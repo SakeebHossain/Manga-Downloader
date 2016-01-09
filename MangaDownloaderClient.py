@@ -33,11 +33,7 @@ class MangaDownloaderClient:
         else:
             print(title + " is an invalid title.")            
 
-            
-        
-q = MangaDownloaderClient()
-q.download_manga('Naruto', [22,1000])
-    
+
     
     
     
