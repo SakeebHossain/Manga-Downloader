@@ -35,9 +35,6 @@ class MangaDownloaderClient:
 
             
         
-q = MangaDownloaderClient()
-q.download_manga('Naruto', [22,1000])
-    
-    
+
     
     
