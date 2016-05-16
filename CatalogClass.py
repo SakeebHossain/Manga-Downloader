@@ -3,23 +3,28 @@ from bs4 import BeautifulSoup
 
 class Catalog:
     """
-    A catalog of all the manga available.
+    A catalog of all the manga available for download.
     """
-    def __init__(self):
-        self.rawCatalog = None
-        self.alphaCatalog = None
-        self.setup()
     
-    def setup(self):
-        soup = self.get_html()
-        self.createCatalogs(soup)
-        
-        
+    def __init__(self):
+        """
+        (Catalog) -> None
+        Sets up the dictionaries the two dictionaries we use to store info
+        about each manga:
+        -rawCatalog maps a the title of the manga to its homepage url
+        -alphaCatalog maps each alphabet to a list of titles, all of which 
+         start with that alphabet
+        """
+        self.rawCatalog = None  
+        self.alphaCatalog = None
+        soup = self.get_html()  # Retrieve the html of the page.
+        self.createCatalogs(soup)  # Create the catalog.
+    
     def get_html(self):
         """
-        None -> BeautifulSoup
+        None -> bs4.BeautifulSoup
         
-        Gets the html version of the mangalist from mangareader.net, and
+        Gets the html of the manga list from mangareader.net, and
         returns the parsed version.
         """
         url = 'http://www.mangareader.net/alphabetical'
