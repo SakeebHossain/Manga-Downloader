@@ -63,4 +63,4 @@ class Catalog:
         
         self.rawCatalog = raw_catalog
         self.alphaCatalog = alpha_catalog
-        print("Finished creating Catalog.")
+        print("Finished creating Catalog!")
