@@ -81,7 +81,7 @@ class Catalog:
         self.write_other_dict_to_file(genre_catalog, 'genreCatalog.txt')        
         self.rawCatalog = raw_catalog
         self.alphaCatalog = alpha_catalog
-<<<<<<< HEAD
+
         print("Finished creating Catalog.")
     
     def write_rawdict_to_file(self, dictionary, file_name):
