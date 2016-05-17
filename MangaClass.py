@@ -6,49 +6,62 @@ import pickle
 
 
 class Manga:
+    """
+    A class that store information about each manga title in the catalogs.
+    """
     
     def __init__(self, title, url):
+        """
+        (String, String) -> None
+        Instatiates manga object. 
+        """
         self.title = title
         self.url = url
-        self.release_date = 'sniff'
-        self.ongoing = 'sniff'
-        self.author = 'sniff'
-        self.genres = 'sniff'
-        self.manga_image = 'sniff'
-        self.num_chapters = 'sniff'
-        self.summary = 'sniff'
-
-
+        self.release_date = "None!"
+        self.ongoing = "None!"
+        self.author = "None!"
+        self.genres = "None!"
+        self.manga_image = "None!"
+        self.num_chapters = "None!"
+        self.summary = "None!"
         self.setup(url)
     
     def setup(self, url):
         """
-        Parses the manga homepage and fills in the req'd info
+        (String) -> None
+        Parses the manga homepage and fills in attributes defined in __init__
         """
+        # Get the HTML of the main page for the manga (provided by the url)
         res = requests.get(url)
         res.raise_for_status()
         html_doc = res.text
         soup = BeautifulSoup(html_doc, 'html.parser')
         
+        # Select the table from the HTML that holds the manga info
         manga_info = soup.select('div div div div table tr td')
         
-        self.release_date = manga_info[5].string
+        self.release_date = manga_info[5].string  # Assign the release date
         
+        # Assign True if ongoing, false otherwise
         if manga_info[7].string == 'Ongoing':
             self.ongoing = True
         else:
             self.ongoing = False       
         
-        self.author = manga_info[9].string
+        self.author = manga_info[9].string  # Assign name of author
         
+        # Iterate through the provided genres (identified by having class
+        #"genretags") and add them to a list 
         genres_list = []
         for genre in soup.find_all("span", class_="genretags"):
             genres_list.append(genre.string)
-        self.genres = genres_list       
+        self.genres = genres_list
+        # might be able to simplify this to:
+        # self.genres = soup.find_all("span", class_="genretags")
 
-        self.manga_image = soup.find('img')['src'] 
+        self.manga_image = soup.find('img')['src']  # Grab URL of main image
         
-        self.summary = soup.p.string
+        self.summary = soup.p.string  # Retrieve the manga summary
         
         list_chapters = soup.find(id="listing").find_all('a')
         try:
@@ -56,35 +69,65 @@ class Manga:
         except:
             self.num_chapters = 'No chapters yet!'
         
-                
-        
     def set_title(self, title):
+        """
+        (String) -> None
+        Set the title of the manga.
+        """
         self.title = title
     
     def set_url(self, url):
+        """
+        (String) -> None
+        Set the URL of the manga.
+        """        
         self.url = url
     
     def set_author(self, author):
+        """
+        (String) -> None
+        Set the author of the manga.
+        """        
         self.author = author
     
     def set_genres(self, genres):
+        """
+        (List of Strings) -> None
+        Set the genres of the manga.
+        """        
         self.genres = genres 
         
     def get_title(self):
+        """
+        (None) -> String
+        Get the title of the manga.
+        """
         return self.title
     
     def get_url(self):
+        """
+        (None) -> String
+        Get the URL of the manga.
+        """
         return self.url
     
     def get_author(self):
+        """
+        (None) -> String
+        Get the author of the manga.
+        """        
         return self.author
     
     def get_genres(self):
+        """
+        (None) -> List of String
+        Get the genres of the manga.
+        """        
         return self.genres
     
     def download_chapters(self, chapter_list):
         """
-        list of int -> None
+        List of int -> None
         """
      
         adjusted_title = self.title
@@ -154,5 +197,8 @@ class Manga:
 
         img_url = soup.find(id='img')['src']
         return img_url
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> a0e45d552593e4359d36f53b43af1f5df0a289bc

@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from MangaClass import *
+
 class Catalog:
     """
     A catalog of all the manga available.
@@ -8,7 +8,6 @@ class Catalog:
     def __init__(self):
         self.rawCatalog = None
         self.alphaCatalog = None
-        self.genreCatalog = None
         self.setup()
     
     def setup(self):
@@ -43,7 +42,6 @@ class Catalog:
         """
         raw_catalog = {}
         alpha_catalog = {}
-        genre_catalog = {}
         # find all anchor tags containing manga titles
         mangas = soup.select('div div div div div ul li a')
         
@@ -62,64 +60,7 @@ class Catalog:
                 alpha_catalog[first_letter].append(manga_name)
             except:
                 alpha_catalog[first_letter] = [manga_name]
-            
-            # create genre_catalog
-
-            #m = Manga(manga_name, 'http://mangareader.net' + link)
         
-            #for gen in m.genres:
-                #try:
-                    #genre_catalog[gen].append(manga_name) 
-                #except:
-                    #genre_catalog[gen] = [manga_name]
-            #print(manga_name + ' --> ' + str(m.genres))  
-
-                
-        
-        self.write_rawdict_to_file(raw_catalog, 'rawCatalog.txt')
-        self.write_other_dict_to_file(alpha_catalog, 'alphaCatalog.txt')
-        self.write_other_dict_to_file(genre_catalog, 'genreCatalog.txt')        
         self.rawCatalog = raw_catalog
         self.alphaCatalog = alpha_catalog
-<<<<<<< HEAD
         print("Finished creating Catalog.")
-    
-    def write_rawdict_to_file(self, dictionary, file_name):
-        my_file = open(file_name, "w")
-        for key in dictionary:
-            my_file.write(str(key) + '!@#' + str(dictionary[key]) + '\n')
-        my_file.close()
-    
-    def write_other_dict_to_file(self, dictionary, file_name):
-        my_file = open(file_name, "w")
-        for key in dictionary:
-            str_list = ''
-            for item in dictionary[key]:
-                str_list += item + '$%^'                
-            my_file.write(str(key) + '!@#' + str_list + '\n')
-        my_file.close()    
-        
-        
-        
-    def search(self, query):
-            results = []
-            for key in self.alphaCatalog.keys():
-                for manga_name in self.alphaCatalog[key]:
-                    if str(query) in manga_name:
-                        results.append(manga_name)
-            results.sort()
-            return results    
-
-##opening other_dict
-#c = Catalog()
-#raw = {}
-#file = open('genreCatalog.txt', 'r')
-#for next_line in file:
-    #line = next_line.split('!@#')
-    #line[1] = line[1].split('$%^')
-    #raw[line[0]] = line[1][:-2]
-
-#print(raw)
-=======
-        print("Finished creating Catalog!")
->>>>>>> a0e45d552593e4359d36f53b43af1f5df0a289bc
