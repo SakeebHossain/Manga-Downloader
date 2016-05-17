@@ -2,6 +2,7 @@ import os, requests
 from bs4 import BeautifulSoup
 import traceback
 import CatalogClass
+import pickle
 
 
 class Manga:
@@ -50,7 +51,10 @@ class Manga:
         self.summary = soup.p.string
         
         list_chapters = soup.find(id="listing").find_all('a')
-        self.num_chapters = list_chapters[-1].string.strip(self.title + ' ')
+        try:
+            self.num_chapters = list_chapters[-1].string.split(' ')[-1]        
+        except:
+            self.num_chapters = 'No chapters yet!'
         
                 
         
@@ -82,10 +86,36 @@ class Manga:
         """
         list of int -> None
         """
-        if not os.path.exists(self.title):
-            os.makedirs(self.title)
+     
+        adjusted_title = self.title
+        for punctuation in '!@#$%^&*+=~><\\/:;':
+            adjusted_title = adjusted_title.replace(punctuation, '')
+        
+        ## ADDITION: Download all chapters
+        if chapter_list == ['*']:
+            chapter_list = range(1, int(self.num_chapters) + 1)
+        #################################
+        
+        ## ADDITION: Download all chapters in a range
+        # format example: [1, '-', 6] would download chapters 1,2,3,4,5 and 6
+        # by replacing '-' with 2,3,4,5
+        if "-" in chapter_list:
+            dash_location = chapter_list.index("-")
+            chapter_list.pop(dash_location)
+            start_index = chapter_list.pop(dash_location-1)
+            end_index = chapter_list.pop(dash_location-1) + 1
+            chapter_list.extend(range(start_index, end_index))
+        #################################
+        
+        ## ADDITION: Make chapter list unique
+        chapter_list = set(chapter_list)
+        
+        #################################        
+            
+        if not os.path.exists(adjusted_title):
+            os.makedirs(adjusted_title)
         for chapter in chapter_list:
-            os.makedirs(self.title + '/' + self.title + ' ' + str(chapter))
+            os.makedirs(adjusted_title + '/' + adjusted_title + ' ' + str(chapter))
             chapter_url = self.url + '/' + str(chapter) + '/'
             page_counter = 1
             has_next_page = True
@@ -97,23 +127,26 @@ class Manga:
                     print("Downloading next page...")
                     page_counter += 1
             except:
+                traceback.print_exc()
                 has_next_page = False
                 print('Starting next chapter...')
         print('Finished!')
 
     
     def download_page(self, page_url, chapter, page_counter):
+        adjusted_title = self.title
+        for punctuation in '!@#$%^&*+=~><\\/:;':
+            adjusted_title = adjusted_title.replace(punctuation, '')        
         img_url = self.get_img_url(page_url)
         res = requests.get(img_url)
-        img_path = self.title + '/' + self.title + ' ' + str(chapter)
-        img_title = self.title + ' ' + str(chapter) + '-' + str(page_counter) + '.jpg'
+        img_path = adjusted_title + '/' + adjusted_title + ' ' + str(chapter)
+        img_title = adjusted_title + ' ' + str(chapter) + '-' + str(page_counter) + '.jpg'
         imageFile = open(os.path.join(img_path, img_title), 'wb')
         for chunk in res.iter_content(100000):
             imageFile.write(chunk)
         imageFile.close()
 
     def get_img_url(self, page_url):
-        print(page_url)
         res = requests.get(page_url)
         res.raise_for_status()
         html_doc = res.text
@@ -122,5 +155,4 @@ class Manga:
         img_url = soup.find(id='img')['src']
         return img_url
 
-#a = Manga('Naruto', 'http://www.mangareader.net/naruto')
-#a.download_chapters([34,22])
+
