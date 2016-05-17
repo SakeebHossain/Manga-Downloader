@@ -120,6 +120,3 @@ class Catalog:
     #raw[line[0]] = line[1][:-2]
 
 #print(raw)
-=======
-        print("Finished creating Catalog!")
->>>>>>> a0e45d552593e4359d36f53b43af1f5df0a289bc

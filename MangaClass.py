@@ -197,8 +197,4 @@ class Manga:
 
         img_url = soup.find(id='img')['src']
         return img_url
-<<<<<<< HEAD
 
-
-=======
->>>>>>> a0e45d552593e4359d36f53b43af1f5df0a289bc
