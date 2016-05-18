@@ -1,18 +1,17 @@
 import requests
 from bs4 import BeautifulSoup
 from MangaClass import *
+
 class Catalog:
     """
-    A catalog of all the manga available.
+    A catalog of all the manga available. Each Catalog class has three
+    "sub-catalogs". See the .createCatalogs() method for more details.
     """
     def __init__(self):
         self.rawCatalog = None
         self.alphaCatalog = None
         self.genreCatalog = None
-        self.setup()
-    
-    def setup(self):
-        soup = self.get_html()
+        soup = self.get_html()  # retrieve bs4 of the manga list on the site
         self.createCatalogs(soup)
         
         
@@ -43,62 +42,38 @@ class Catalog:
         """
         raw_catalog = {}
         alpha_catalog = {}
-        genre_catalog = {}
+        
         # find all anchor tags containing manga titles
+        # i.e. <a href="www...com">One Piece</a>
+        # .select returns an array of these anchor tags as strings
         mangas = soup.select('div div div div div ul li a')
         
-        # create raw_catalog
+        # Iterate through each manga/achor in mangas
         for manga in mangas:
+            # Create the raw_catalog
             try:
-                manga_name = manga.string
-                link = manga['href']
-                raw_catalog[manga_name] = link           
+                manga_name = manga.string  # .string gives what's b/w tags
+                link = manga['href']  # retrieves the href link
+                raw_catalog[manga_name] = link  # add the managa to raw
             except:
                 print("Failed to find a manga. Title was: ", manga_name)
             
-            # create alpha_catalog
-            first_letter = manga_name[0].upper()
+            # Create the alpha_catalog
+            first_letter = manga_name[0].upper()  # get first letter of title
             try:
-                alpha_catalog[first_letter].append(manga_name)
+                # if a manga title starting with this letter already has
+                # an entry, we can just append to its list
+                alpha_catalog[first_letter].append(manga_name)  
             except:
+                # if we haven't encountered a manga starting with that letter,
+                # we just create the list!
                 alpha_catalog[first_letter] = [manga_name]
-            
-            # create genre_catalog
-
-            #m = Manga(manga_name, 'http://mangareader.net' + link)
-        
-            #for gen in m.genres:
-                #try:
-                    #genre_catalog[gen].append(manga_name) 
-                #except:
-                    #genre_catalog[gen] = [manga_name]
-            #print(manga_name + ' --> ' + str(m.genres))  
-
                 
-        
-        self.write_rawdict_to_file(raw_catalog, 'rawCatalog.txt')
-        self.write_other_dict_to_file(alpha_catalog, 'alphaCatalog.txt')
-        self.write_other_dict_to_file(genre_catalog, 'genreCatalog.txt')        
+       
         self.rawCatalog = raw_catalog
         self.alphaCatalog = alpha_catalog
 
-        print("Finished creating Catalog.")
-    
-    def write_rawdict_to_file(self, dictionary, file_name):
-        my_file = open(file_name, "w")
-        for key in dictionary:
-            my_file.write(str(key) + '!@#' + str(dictionary[key]) + '\n')
-        my_file.close()
-    
-    def write_other_dict_to_file(self, dictionary, file_name):
-        my_file = open(file_name, "w")
-        for key in dictionary:
-            str_list = ''
-            for item in dictionary[key]:
-                str_list += item + '$%^'                
-            my_file.write(str(key) + '!@#' + str_list + '\n')
-        my_file.close()    
-        
+        print("Finished creating Catalog.")     
         
         
     def search(self, query):
@@ -109,14 +84,3 @@ class Catalog:
                         results.append(manga_name)
             results.sort()
             return results    
-
-##opening other_dict
-#c = Catalog()
-#raw = {}
-#file = open('genreCatalog.txt', 'r')
-#for next_line in file:
-    #line = next_line.split('!@#')
-    #line[1] = line[1].split('$%^')
-    #raw[line[0]] = line[1][:-2]
-
-#print(raw)

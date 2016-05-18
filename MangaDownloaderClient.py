@@ -76,9 +76,10 @@ class MangaDownloaderClient:
             print(title + " is an invalid title.")            
 
 a = MangaDownloaderClient()
-#Finished creating Catalog.
-#q = a.search('Bizarre')[2]
-#a.download_manga(q, [152])
+
+
+q = a.search('Bizarre')[2]
+a.download_manga(q, [152])
 
 #Yokohama Kaidashi Kikou
 
