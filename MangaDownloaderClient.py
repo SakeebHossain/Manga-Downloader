@@ -52,6 +52,15 @@ class MangaDownloaderClient:
     def download_manga(self, title, chapters):
         """
         Method used to download the manga.
+        
+        Formatting:
+        a = MangaDownloaderClient()
+        
+        a.download_manga(*proper manga title*, [*comma separated ints*]) #download specified chapters
+        OR 
+        a.download_manga(*proper manga title*, [*starting chapter*, '-', *ending chapter*]) #
+        OR
+        a.download_manga(*proper manga title*, ['*'])  #download ALL chapters
         """        
         #chapters.sort()
         if title in self.cat.rawCatalog.keys():
@@ -78,8 +87,9 @@ class MangaDownloaderClient:
 a = MangaDownloaderClient()
 
 
-q = a.search('Bizarre')[2]
-a.download_manga(q, [152])
+# q = a.search('Jikan')[-1]
+# print(q)
 
-#Yokohama Kaidashi Kikou
+a.download_manga("Shingeki no Kyojin", [86, "-", 96])
+###Yokohama Kaidashi Kikou
 

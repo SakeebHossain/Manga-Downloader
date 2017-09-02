@@ -4,9 +4,17 @@ from MangaClass import *
 
 class Catalog:
     """
-    A catalog of all the manga available. Each Catalog class has three
-    "sub-catalogs". See the .createCatalogs() method for more details.
+    A "catalog" of all the manga available. Each Catalog class has three
+    "sub-catalogs". These sub-catalogues organize the manga titles in some 
+    way. See the .createCatalogs() method for more details.
+    
+    Catalog methods:
+    - __init__()
+    - get_html()
+    - createCatalogs()
+    - search()
     """
+    
     def __init__(self):
         self.rawCatalog = None
         self.alphaCatalog = None
@@ -37,8 +45,8 @@ class Catalog:
         BeautifulSoup -> None
         
         Finds all the manga titles on the page and creates two dictionaries;
-        -raw_catalog, maps title -> url of chapter list page
-        -alpha_catalog, maps first letter of title -> title
+        - raw_catalog: a dict that maps 'title' -> 'url of chapter list page'
+        - alpha_catalog: a dict that maps 'first letter of title' -> 'title'
         """
         raw_catalog = {}
         alpha_catalog = {}

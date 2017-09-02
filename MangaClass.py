@@ -7,7 +7,23 @@ import pickle
 
 class Manga:
     """
-    A class that store information about each manga title in the catalogs.
+    A class that store information about a specific manga title in the catalogs.
+    We have one of each Manga class for each title in the raw catalogs
+    
+    Manga methods:
+    - __init__()
+    - setup()
+    - getters/setters for : title, author, url, genre
+    - download_chapters()
+    - download_page()
+    - get_img_url()
+    
+    To-do:
+    - consider creating an layer of abstraction here. 
+    - consider creating an update() function. 
+    - maybe we want to have a 
+    - something like a designated "manga library" where all manga will be 
+      stored. This way we can update all the manga. 
     """
     
     def __init__(self, title, url):
@@ -29,7 +45,8 @@ class Manga:
     def setup(self, url):
         """
         (String) -> None
-        Parses the manga homepage and fills in attributes defined in __init__
+        Given a url to a specific manga's info page, this function 
+        parses it and fills in attributes defined in __init__
         """
         # Get the HTML of the main page for the manga (provided by the url)
         res = requests.get(url)
@@ -128,6 +145,22 @@ class Manga:
     def download_chapters(self, chapter_list):
         """
         List of int -> None
+        
+        Given a list of numbers, downloads all the chapters of the manga whose
+        chapter number is contained in the list.
+        
+        There are some shortcuts added in to make downloading easier.
+        1. [1, 3, 60] : downloads chapters 1, 3 and 60.
+        2. ['*'] : downloads all chapters.
+        3. [1, '-', 6] : downloads chapters 1, 2, 3, 4, 5, and 6.
+        
+        The Chapters are downloaded into a folder with the structure:
+        *Manga Title*/*Manga Title *Chapter Number*/*Manga Title* *Chapter Number*-*Page Number*
+        i.e. Naruto/Naruto 1/Naruto 1-7
+        
+        To-do:
+        - 
+        
         """
      
         adjusted_title = self.title
@@ -190,6 +223,12 @@ class Manga:
         imageFile.close()
 
     def get_img_url(self, page_url):
+        """
+        (String) -> None
+        
+        Given a link to a specific page of a manga, returns the url of the img
+        file on the page.
+        """
         res = requests.get(page_url)
         res.raise_for_status()
         html_doc = res.text
@@ -197,4 +236,3 @@ class Manga:
 
         img_url = soup.find(id='img')['src']
         return img_url
-
