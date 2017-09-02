@@ -34,10 +34,10 @@ class MangaDownloaderClient:
                 print("Author: " + manga.author)
             except:
                 print("Couldn't print author!")
-            try:
-                print("Genres: " + manga.genres)
-            except:
-                print("Couldn't print genres!")
+            #try:
+                #print("Genres: " + manga.genres)
+            #except:
+                #print("Couldn't print genres!")
             try:
                 print("No. Chapters: " + manga.num_chapters)
             except:
@@ -70,26 +70,14 @@ class MangaDownloaderClient:
                 for i in chapters:
                     if i == '*' or i == '-':
                         pass
-                    elif((type(i) != int) or (i > int(manga.num_chapters))):
-                        print(str((i > int(manga.num_chapters))))
-                        print(type(i) != int)
-                        print('All items in chapter_list must be an int less '
+                    elif((int(i) > int(manga.num_chapters))):
+                        print('Error: all items in chapter list must be an number less '
                         'than ' + str(manga.num_chapters) + ' , which is the total '
                         'number of chapters available for ' + manga.title + '.')
                         return
                 manga.download_chapters(chapters)
             except:
                 print("Sorry, there was an error.")
-                traceback.print_exc()
+                #traceback.print_exc()
         else:
             print(title + " is an invalid title.")            
-
-a = MangaDownloaderClient()
-
-
-# q = a.search('Jikan')[-1]
-# print(q)
-
-a.download_manga("Shingeki no Kyojin", [86, "-", 96])
-###Yokohama Kaidashi Kikou
-

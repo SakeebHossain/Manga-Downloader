@@ -1,4 +1,5 @@
 import requests
+from multiprocessing import Queue
 from bs4 import BeautifulSoup
 from MangaClass import *
 
@@ -81,7 +82,7 @@ class Catalog:
         self.rawCatalog = raw_catalog
         self.alphaCatalog = alpha_catalog
 
-        print("Finished creating Catalog.")     
+        #print("Finished creating Catalog.")     
         
         
     def search(self, query):

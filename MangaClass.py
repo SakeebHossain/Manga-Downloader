@@ -1,4 +1,5 @@
 import os, requests
+from multiprocessing import Queue
 from bs4 import BeautifulSoup
 import traceback
 import CatalogClass
@@ -178,34 +179,33 @@ class Manga:
         if "-" in chapter_list:
             dash_location = chapter_list.index("-")
             chapter_list.pop(dash_location)
-            start_index = chapter_list.pop(dash_location-1)
-            end_index = chapter_list.pop(dash_location-1) + 1
+            start_index = int(chapter_list.pop(dash_location-1))
+            end_index = int(chapter_list.pop(dash_location-1)) + 1
             chapter_list.extend(range(start_index, end_index))
         #################################
         
         ## ADDITION: Make chapter list unique
         chapter_list = set(chapter_list)
         
-        #################################        
+        #################################         
             
-        if not os.path.exists(adjusted_title):
-            os.makedirs(adjusted_title)
+        if not os.path.exists("Downloads/"+adjusted_title):
+            os.makedirs("Downloads/"+adjusted_title)
         for chapter in chapter_list:
-            os.makedirs(adjusted_title + '/' + adjusted_title + ' ' + str(chapter))
+            os.makedirs("Downloads/"+adjusted_title + '/' + adjusted_title + ' ' + str(chapter))
             chapter_url = self.url + '/' + str(chapter) + '/'
             page_counter = 1
             has_next_page = True
             try:
                 while has_next_page:
                     page_url = chapter_url + str(page_counter)
-                    print('Downloading ' + page_url + '...')
+                    print('Downloading', self.title, "Chapter", chapter, "Page", page_counter)
                     self.download_page(page_url, chapter, page_counter)
-                    print("Downloading next page...")
                     page_counter += 1
             except:
-                traceback.print_exc()
+                #traceback.print_exc()
                 has_next_page = False
-                print('Starting next chapter...')
+                print('Beginning download of next chapter')
         print('Finished!')
 
     
@@ -215,7 +215,7 @@ class Manga:
             adjusted_title = adjusted_title.replace(punctuation, '')        
         img_url = self.get_img_url(page_url)
         res = requests.get(img_url)
-        img_path = adjusted_title + '/' + adjusted_title + ' ' + str(chapter)
+        img_path = "Downloads/" + adjusted_title + '/' + adjusted_title + ' ' + str(chapter)
         img_title = adjusted_title + ' ' + str(chapter) + '-' + str(page_counter) + '.jpg'
         imageFile = open(os.path.join(img_path, img_title), 'wb')
         for chunk in res.iter_content(100000):
