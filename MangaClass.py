@@ -1,9 +1,6 @@
 import os, requests
-from multiprocessing import Queue
 from bs4 import BeautifulSoup
-import traceback
 import CatalogClass
-import pickle
 
 
 class Manga:

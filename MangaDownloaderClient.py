@@ -1,6 +1,5 @@
 from CatalogClass import *
 from MangaClass import *
-import traceback
 
 
 class MangaDownloaderClient:

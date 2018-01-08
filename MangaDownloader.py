@@ -1,5 +1,5 @@
 from MangaDownloaderClient import *
-import time
+
 
 client = MangaDownloaderClient()
 start = 1

@@ -1,5 +1,4 @@
 import requests
-from multiprocessing import Queue
 from bs4 import BeautifulSoup
 from MangaClass import *
 
