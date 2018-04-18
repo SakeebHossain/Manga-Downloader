@@ -2,6 +2,7 @@ import os, requests
 from bs4 import BeautifulSoup
 import CatalogClass
 
+site = "MangaHere"
 
 class Manga:
     """
@@ -52,37 +53,78 @@ class Manga:
         html_doc = res.text
         soup = BeautifulSoup(html_doc, 'html.parser')
         
-        # Select the table from the HTML that holds the manga info
-        manga_info = soup.select('div div div div table tr td')
         
-        self.release_date = manga_info[5].string  # Assign the release date
+        if site == "MangaReader":
+            # Select the table from the HTML that holds the manga info
+            manga_info = soup.select('div div div div table tr td')
+            
+            self.release_date = manga_info[5].string  # Assign the release date
+            
+            # Assign True if ongoing, false otherwise
+            if manga_info[7].string == 'Ongoing':
+                self.ongoing = True
+            else:
+                self.ongoing = False       
+            
+            self.author = manga_info[9].string  # Assign name of author
+            
+            # Iterate through the provided genres (identified by having class
+            #"genretags") and add them to a list 
+            genres_list = []
+            for genre in soup.find_all("span", class_="genretags"):
+                genres_list.append(genre.string)
+            self.genres = genres_list
+            # might be able to simplify this to:
+            # self.genres = soup.find_all("span", class_="genretags")
         
-        # Assign True if ongoing, false otherwise
-        if manga_info[7].string == 'Ongoing':
-            self.ongoing = True
-        else:
-            self.ongoing = False       
+            self.manga_image = soup.find('img')['src']  # Grab URL of main image
+            
+            self.summary = soup.p.string  # Retrieve the manga summary
+            
+            list_chapters = soup.find(id="listing").find_all('a')
+            try:
+                self.num_chapters = list_chapters[-1].string.split(' ')[-1]        
+            except:
+                self.num_chapters = 'No chapters yet!'
+                
         
-        self.author = manga_info[9].string  # Assign name of author
-        
-        # Iterate through the provided genres (identified by having class
-        #"genretags") and add them to a list 
-        genres_list = []
-        for genre in soup.find_all("span", class_="genretags"):
-            genres_list.append(genre.string)
-        self.genres = genres_list
-        # might be able to simplify this to:
-        # self.genres = soup.find_all("span", class_="genretags")
+        elif site == "MangaHere":
+            # Select the table from the HTML that holds the manga info
+            manga_info = soup.select('[class~=manga_detail_top] li')
 
-        self.manga_image = soup.find('img')['src']  # Grab URL of main image
+            
+            self.release_date = "Unavailable"  # Assign the release date
+            
+            # Assign True if ongoing, false otherwise
+            if manga_info[7].string == 'Ongoing':
+                self.ongoing = True
+            else:
+                self.ongoing = False       
+                
+
+            
+            self.author = manga_info[4].contents[1].contents[0]  # Assign name of author
+
+            
+            # Iterate through the provided genres (identified by having class
+            #"genretags") and add them to a list 
+            genres_list = []
+            for genre in (manga_info[3].contents)[1].split(","):
+                genres_list.append(genre.lstrip())
+            self.genres = genres_list
+
+            self.manga_image = soup.select('[class~=manga_detail_top] img')[0]['src']  # Grab URL of main image
+         
+            self.summary = manga_info[8].contents[4].contents[0]  # Retrieve the manga summary
         
-        self.summary = soup.p.string  # Retrieve the manga summary
-        
-        list_chapters = soup.find(id="listing").find_all('a')
-        try:
-            self.num_chapters = list_chapters[-1].string.split(' ')[-1]        
-        except:
-            self.num_chapters = 'No chapters yet!'
+            list_chapters = soup.select('[class~=detail_list] ul li span a')
+            
+            try:
+                self.num_chapters = list_chapters[0].contents[0].rstrip().split(" ")[-1]      
+            except:
+                self.num_chapters = 'No chapters yet!'
+
+            
         
     def set_title(self, title):
         """
@@ -230,6 +272,11 @@ class Manga:
         res.raise_for_status()
         html_doc = res.text
         soup = BeautifulSoup(html_doc, 'html.parser')
-
-        img_url = soup.find(id='img')['src']
-        return img_url
+        
+        if site == "MangaReader":
+            img_url = soup.find(id='img')['src']
+        
+        elif site == "MangaHere":
+            img_url = soup.find(id='image')['src']
+            
+        return img_url   
