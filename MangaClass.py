@@ -182,7 +182,7 @@ class Manga:
         """        
         return self.genres
     
-    def download_chapters(self, chapter_list):
+    def download_chapters(self, chapter_list, mh_args="v"):
         """
         List of int -> None
         
@@ -194,10 +194,31 @@ class Manga:
         2. ['*'] : downloads all chapters.
         3. [1, '-', 6] : downloads chapters 1, 2, 3, 4, 5, and 6.
         
-        The Chapters are downloaded into a folder with the structure:
+        FOR MANGAREADER:
+        MangaReader uses a chapter system. Chapters are downloaded into a folder with the structure:
         *Manga Title*/*Manga Title *Chapter Number*/*Manga Title* *Chapter Number*-*Page Number*
         i.e. Naruto/Naruto 1/Naruto 1-7
+
+        FOR MANGAHERE
+        MangaHere uses both chapter and volume systems for organizing manga. The volume system
+        URLS look something like: "/v001/c002/3.html". This means the logic will now be to start
+        at v001/c001/1, and continue increasing page number until we fail, at which point we'll 
+        reset page number and increase chapter number. If that fails, we know we've reached a 
+        new volume. We will also have a slightly different file path:
         
+        *Manga Title*/*Manga Title* *Volume Number*/*Manga Title* *Volume Number*-*Chapter Number*/
+        *Manga Title* *Volume Number*-*Chapter Number*-*Page Number*
+        i.e. Naruto/Naruto 1/Naruto 1-1/Naruto 1-1-1
+
+        An alternative idea is to just download directly from the chapter list. As in open each
+        link and iterate through the pages until we run out. This guarantees everything gets 
+        downloaded, even if it has a weird URL. Problem with this though is dealing with chapter
+        ranges as input. Perhaps this can just have its own option, like a -force flag.
+
+        To do detect if a manga uses the volume or chapter system, we can inspect the chapter list
+        soup to see how often these words appear: VOL, Vol, vol, VOLUME, Volume, volume. If this
+        is equal or at least very close to the chapter_num then it is most likely the volume system
+        is being used.
         To-do:
         - 
         
@@ -230,36 +251,116 @@ class Manga:
             
         if not os.path.exists("Downloads/"+adjusted_title):
             os.makedirs("Downloads/"+adjusted_title)
-        for chapter in chapter_list:
-            os.makedirs("Downloads/"+adjusted_title + '/' + adjusted_title + ' ' + str(chapter))
-            chapter_url = self.url + '/' + str(chapter) + '/'
-            page_counter = 1
-            has_next_page = True
-            try:
-                while has_next_page:
-                    page_url = chapter_url + str(page_counter)
-                    print('Downloading', self.title, "Chapter", chapter, "Page", page_counter)
-                    self.download_page(page_url, chapter, page_counter)
-                    page_counter += 1
-            except:
-                #traceback.print_exc()
-                has_next_page = False
-                print('Beginning download of next chapter')
-        print('Finished!')
+        
+        if site == "MangaReader":
+        
+            for chapter in chapter_list:
+                os.makedirs("Downloads/"+adjusted_title + '/' + adjusted_title + ' ' + str(chapter))
+                chapter_url = self.url + '/' + str(chapter) + '/'
+                page_counter = 1
+                has_next_page = True
+                try:
+                    while has_next_page:
+                        page_url = chapter_url + str(page_counter)
+                        print('Downloading', self.title, "Chapter", chapter, "Page", page_counter)
+                        self.download_page(page_url, chapter, page_counter)
+                        page_counter += 1
+                except:
+                    #traceback.print_exc()
+                    has_next_page = False
+                    print('Beginning download of next chapter')
+            print('Finished!')
+
+
+        
+        elif site == "MangaHere":
+
+        	if mh_args == "c":
+
+	            for chapter in chapter_list:
+	                os.makedirs("Downloads/"+adjusted_title + '/' + adjusted_title + ' ' + str(chapter))
+	                chapter_url = self.url + '/' + "c" + "0"*(3-len(str(chapter))) + str(chapter) + '/'
+	                page_counter = 1
+	                has_next_page = True
+	                try:
+	                    while has_next_page:
+	                        page_url = chapter_url + str(page_counter)  + ".html"
+	                        print('Downloading', self.title, "Chapter", chapter, "Page", page_counter)
+	                        self.download_page(page_url, chapter, page_counter)
+	                        page_counter += 1
+	                except:
+	                    #traceback.print_exc()
+	                    has_next_page = False
+	                    print('Beginning download of next chapter')
+	            print('Finished!')
+
+
+	        elif mh_args == "v":
+		    
+		    for volume in chapter_list:
+			
+			os.makedirs("Downloads/"+adjusted_title + '/' + adjusted_title + ' ' + str(volume))
+			volume_url = self.url + '/' + "v" + "0"*(3-len(str(volume))) + str(volume) + '/'
+			
+			has_next_chapter = True
+			chapter_counter = 1
+			
+			try: 
+			    while has_next_chapter:	
+				
+				has_next_page = True
+				page_counter = 1	
+				
+				try:
+				    while has_next_page:
+					
+					page_url = volume_url + "c" + "0"*(3-len(str(volume))) + str(chapter_counter) + "/" + str(page_counter) + ".html"
+					print('Downloading', self.title, "Volume", volume, "Chapter", chapter_counter, "Page", page_counter)
+	                                self.download_page(page_url, chapter, page_counter, volume)
+	                                page_counter += 1
+
+		                except:
+		                    has_next_page = False
+				    chapter_counter += 1
+				    print('Beginning download of next chapter')
+			except:
+			    has_next_chapter = False
+			    print('Beginning download of next volume')
+			         
+	print('Finished!')
+
+
 
     
-    def download_page(self, page_url, chapter, page_counter):
-        adjusted_title = self.title
-        for punctuation in '!@#$%^&*+=~><\\/:;':
-            adjusted_title = adjusted_title.replace(punctuation, '')        
-        img_url = self.get_img_url(page_url)
-        res = requests.get(img_url)
-        img_path = "Downloads/" + adjusted_title + '/' + adjusted_title + ' ' + str(chapter)
-        img_title = adjusted_title + ' ' + str(chapter) + '-' + str(page_counter) + '.jpg'
-        imageFile = open(os.path.join(img_path, img_title), 'wb')
-        for chunk in res.iter_content(100000):
-            imageFile.write(chunk)
-        imageFile.close()
+    def download_page(self, page_url, chapter, page_counter, volume=None):
+	
+	if site == "MangaReader":
+	    adjusted_title = self.title
+	    for punctuation in '!@#$%^&*+=~><\\/:;':
+		adjusted_title = adjusted_title.replace(punctuation, '')        
+	    img_url = self.get_img_url(page_url)
+	    res = requests.get(img_url)
+	    img_path = "Downloads/" + adjusted_title + '/' + adjusted_title + ' ' + str(chapter)
+	    img_title = adjusted_title + ' ' + str(chapter) + '-' + str(page_counter) + '.jpg'
+	    imageFile = open(os.path.join(img_path, img_title), 'wb')
+	    for chunk in res.iter_content(100000):
+		imageFile.write(chunk)
+	    imageFile.close()
+	
+	elif site == "MangaHere":
+	    adjusted_title = self.title
+	    for punctuation in '!@#$%^&*+=~><\\/:;':
+		adjusted_title = adjusted_title.replace(punctuation, '')        
+	    img_url = self.get_img_url(page_url)
+	    res = requests.get(img_url)
+	    img_path = "Downloads/" + adjusted_title + '/' + adjusted_title + ' ' + str(volume) + '/' + adjusted_title + ' ' + str(volume) + '-' + str(chapter)
+	    img_title = adjusted_title + ' ' + str(volume) + '-' + str(chapter) + '-' + str(page_counter) + '.jpg'
+	    imageFile = open(os.path.join(img_path, img_title), 'wb')
+	    for chunk in res.iter_content(100000):
+		imageFile.write(chunk)
+	    imageFile.close()	    
+	    
+        
 
     def get_img_url(self, page_url):
         """
