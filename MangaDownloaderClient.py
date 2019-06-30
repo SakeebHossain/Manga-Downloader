@@ -19,7 +19,7 @@ class MangaDownloaderClient:
         Tells you info about the manga.
         """
         if title in self.cat.rawCatalog.keys():
-            url = 'http://www.mangareader.net' + self.cat.rawCatalog[title]
+            url = 'https://www.mangareader.net' + self.cat.rawCatalog[title]
             manga = Manga(title, url)        
             try:
                 print("Title: " + manga.title)

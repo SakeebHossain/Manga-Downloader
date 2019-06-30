@@ -1,7 +1,7 @@
 from cx_Freeze import setup, Executable
 
 build_exe_options = {
-        'packages': ['MangaDownloaderClient', 'requests', 'os','bs4', "idna.idnadata", "multiprocessing"]
+        'packages': ['MangaDownloaderClient', 'requests', 'os','bs4', "idna.idnadata", "OpenSSL", "urllib3", "multiprocessing"]
     }
 
 setup(name = "MangaDownloader" ,
