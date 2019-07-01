@@ -102,33 +102,26 @@ class Manga:
                 
         elif site == 'MangaHere':
 
-            # Select the table from the HTML that holds the manga info
-
-            manga_info = soup.select('[class~=manga_detail_top] li')
-
             self.release_date = 'Unavailable'  # Assign the release date
 
             # Assign True if ongoing, false otherwise
 
-            if manga_info[7].string == 'Ongoing':
-                self.ongoing = True
-            else:
-                self.ongoing = False
+            self.ongoing = soup.select('[class~=detail-info-right-title-tip]')[0].text
 
-            self.author = manga_info[4].contents[1].contents[0]  # Assign name of author
+            self.author = soup.select('[class~=detail-info-right-say] a')[0].text # Assign name of author
 
             # Iterate through the provided genres (identified by having class
             # "genretags") and add them to a list
 
             genres_list = []
-            for genre in manga_info[3].contents[1].split(','):
-                genres_list.append(genre.lstrip())
+            for genre in soup.select('[class~=detail-info-right-tag-list] a'):
+                genres_list.append(genre.text)
             self.genres = genres_list
 
             self.manga_image = \
-                soup.select('[class~=manga_detail_top] img')[0]['src']  # Grab URL of main image
+                soup.select('[class~=detail-info-cover-img]')[0]['src']  # Grab URL of main image
 
-            self.summary = manga_info[8].contents[4].contents[0]  # Retrieve the manga summary
+            self.summary = soup.select('[class~=detail-info-right-content]')[0].text # Retrieve the manga summary
 
             list_chapters = \
                 soup.select('[class~=detail_list] ul li span a')
@@ -491,6 +484,10 @@ class Manga:
         return img_url
     
 
-m = Manga("Battle Angel Alita", "http://www.mangahere.cc/manga/battle_angel_alita/")
-m.download_chapters([1,2])
+#m = Manga("Battle Angel Alita", "http://www.mangahere.cc/manga/battle_angel_alita/")
+#m.download_chapters([1,2])
 
+res = requests.get("http://www.mangahere.cc/manga/battle_angel_alita/")
+res.raise_for_status()
+html_doc = res.text
+soup = BeautifulSoup(html_doc, 'html.parser')
