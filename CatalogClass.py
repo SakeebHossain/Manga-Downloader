@@ -44,7 +44,6 @@ class Catalog:
         
         # get html of of webpage, parse with bs4
         res = requests.get(url)
-        res.raise_for_status()
         html_doc = res.text
         soup = BeautifulSoup(html_doc, 'html.parser')
         
@@ -108,15 +107,15 @@ class Catalog:
         # find all anchor tags containing manga titles
         # i.e. <a href="www...com">One Piece</a>
         # .select returns an array of these anchor tags as strings
-        mangas = self.MH_soup.select("[class~=list_manga] ul li a")
+        mangas = self.MH_soup.select("[class~=browse-new-block-content] a")
         
         # Iterate through each manga/anchor in mangas
         for manga in mangas:
             # Create the raw_catalog
             try:
-                manga_name = " ".join(manga['rel'])  # rel tag contains title
-                link = manga['href'][2:]  # retrieves the href link; strip off '//'
-                raw_catalog[manga_name] = link  # add the managa to raw
+                manga_name = manga.text  # rel tag contains title
+                link = manga['href']  # retrieves the href link
+                raw_catalog[manga_name] = link  # add the manga to raw
             except:
                 print("Failed to find a manga. Title was: ", manga_name)
             

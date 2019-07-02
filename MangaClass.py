@@ -124,7 +124,7 @@ class Manga:
             self.summary = soup.select('[class~=detail-info-right-content]')[0].text # Retrieve the manga summary
 
             list_chapters = \
-                soup.select('[class~=detail_list] ul li span a')
+                soup.select('[class~=detail-main-list] li a')
 
             try:
                 self.num_chapters = \
@@ -308,10 +308,13 @@ class Manga:
             if mh_args == 'c':
 
                 for chapter in chapter_list:
+                    
                     os.makedirs('Downloads/' + adjusted_title + '/'
                                 + adjusted_title + ' ' + str(chapter))
                     chapter_url = self.url + '/' + 'c' + '0' * (3
                             - len(str(chapter))) + str(chapter) + '/'
+                    #chapter_url = self.url + '/' + 'c' + '0' * (2
+                            #- len(str(chapter))) + str(chapter) + '/'                    
                     page_counter = 1
                     has_next_page = True
                     try:
@@ -385,8 +388,9 @@ class Manga:
          
                 chapter_list = []
                 # grab urls from chapter list
-                for i in m.soup.select('[class~=detail_list] ul li span a'):
+                for i in m.soup.select('[class~=detail-main-list] li a'):
                     chapter_list.append(i['href']) 
+                    print("DEBUG: PRINT CHAPTER", i['href'])
                     
                 # Since first chapter will be last in this list
                 chapter_list.reverse()                             
@@ -479,15 +483,27 @@ class Manga:
             img_url = soup.find(id='img')['src']
         elif site == 'MangaHere':
 
-            img_url = soup.find(id='image')['src']
+            img_url = soup.find(id='[class~=reader-main-img]')['src']
 
         return img_url
     
 
-#m = Manga("Battle Angel Alita", "http://www.mangahere.cc/manga/battle_angel_alita/")
+#m = Manga("Battle Angel Alita", "http://www.mangahere.cc/manga/vovnich_hotel/")
 #m.download_chapters([1,2])
-
-res = requests.get("http://www.mangahere.cc/manga/battle_angel_alita/")
+url = "http://www.mangahere.cc/manga/vovnich_hotel/"
+res = requests.get("https://www.mangahere.cc/manga/hatarakanai_futari_yoshida_satoru/")
 res.raise_for_status()
 html_doc = res.text
 soup = BeautifulSoup(html_doc, 'html.parser')
+
+session = requests.get(url)
+
+print(session.cookies.get_dict())
+
+"""
+c = {'isAdult': '1'}
+c
+{'isAdult': '1'}
+r = requests.get(url, cookies=c)
+"title3" in r.text
+"""
