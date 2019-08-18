@@ -4,13 +4,7 @@ A tool that scrapes various manga sites as saves them as `.jpegs` on your comput
 
 ## Installation
 
-
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install `pyinstaller`. Then, navigate to this repository and run
-
-```bash
-pyinstaller MangaDownloader.py
-```
-This will generate a `build` and `dist` directories in your repository. You can find the application in `dist\MangaDownloader\MangaDownloader.exe`.
+Run the install script `install.sh`. This will generate a `build` and `dist` directories in your repository. This will generate the bundle in a subdirectory called `dist` where you will find the application.
 
 ## Usage
 
