@@ -8,19 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.1] - 2019-08-17
 ### Added
-- Better explanation of the difference between the file ("CHANGELOG")
-and its function "the change log".
+- Support for `mangareader.net`.
+- `requirements.txt` and `install.sh` to make installing the 
+tool easier.
 
 ### Changed
-- Refer to a "change log" instead of a "CHANGELOG" throughout the site
-to differentiate between the file and the purpose of the file — the
-logging of changes.
+- Went from using `cx-freeze` to `pyinstaller` because we were 
+experiencing SSL issues, wasn't making much progress with it. 
 
 ### Removed
-- Remove empty sections from CHANGELOG, they occupy too much space and
-create too much noise in the file. People will have to assume that the
-missing sections were intentionally left out because they contained no
-notable changes.
+- Everything to do with `https://mangahere.cc`, it was too much 
+trouble trying to download the images because of the way it has 
+to "load" images, hiding the image link. Besides it's pulling
+the image from other manga sites anyway!
 
 [Unreleased]: https://github.com/SakeebHossain/Manga-Downloader/compare/v0.0.1...HEAD
 [0.0.2]: https://github.com/SakeebHossain/Manga-Downloader/compare/v0.0.1...v0.0.2
