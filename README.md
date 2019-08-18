@@ -28,6 +28,9 @@ Run the install script `install.sh`. This will generate a `build` and `dist` dir
         -only [n...]
               downloads all chapters numbers listed in [n...]
 
+## Supported sites
+- [mangareader](https://www.mangareader.net)
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
