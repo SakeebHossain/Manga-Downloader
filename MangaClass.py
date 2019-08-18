@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import CatalogClass
 import traceback
-site = 'MangaHere'
+site = 'MangaReader'
 
 
 class Manga:
@@ -100,38 +100,6 @@ class Manga:
             except:
                 self.num_chapters = 'No chapters yet!'
                 
-        elif site == 'MangaHere':
-
-            self.release_date = 'Unavailable'  # Assign the release date
-
-            # Assign True if ongoing, false otherwise
-
-            self.ongoing = soup.select('[class~=detail-info-right-title-tip]')[0].text
-
-            self.author = soup.select('[class~=detail-info-right-say] a')[0].text # Assign name of author
-
-            # Iterate through the provided genres (identified by having class
-            # "genretags") and add them to a list
-
-            genres_list = []
-            for genre in soup.select('[class~=detail-info-right-tag-list] a'):
-                genres_list.append(genre.text)
-            self.genres = genres_list
-
-            self.manga_image = \
-                soup.select('[class~=detail-info-cover-img]')[0]['src']  # Grab URL of main image
-
-            self.summary = soup.select('[class~=detail-info-right-content]')[0].text # Retrieve the manga summary
-
-            list_chapters = \
-                soup.select('[class~=detail-main-list] li a')
-
-            try:
-                self.num_chapters = \
-                    list_chapters[0].contents[0].rstrip().split(' ')[-1]
-            except:
-                self.num_chapters = 'No chapters yet!'
-        
         return soup
 
     def set_title(self, title):
@@ -214,30 +182,6 @@ class Manga:
         MangaReader uses a chapter system. Chapters are downloaded into a folder with the structure:
         *Manga Title*/*Manga Title *Chapter Number*/*Manga Title* *Chapter Number*-*Page Number*
         i.e. Naruto/Naruto 1/Naruto 1-7
-
-        FOR MANGAHERE
-        MangaHere uses both chapter and volume systems for organizing manga. The volume system
-        URLS look something like: "/v001/c002/3.html". This means the logic will now be to start
-        at v001/c001/1, and continue increasing page number until we fail, at which point we'll 
-        reset page number and increase chapter number. If that fails, we know we've reached a 
-        new volume. We will also have a slightly different file path:
-        
-        *Manga Title*/*Manga Title* *Volume Number*/*Manga Title* *Volume Number*-*Chapter Number*/
-        *Manga Title* *Volume Number*-*Chapter Number*-*Page Number*
-        i.e. Naruto/Naruto 1/Naruto 1-1/Naruto 1-1-1
-
-        An alternative idea is to just download directly from the chapter list. As in open each
-        link and iterate through the pages until we run out. This guarantees everything gets 
-        downloaded, even if it has a weird URL. Problem with this though is dealing with chapter
-        ranges as input. Perhaps this can just have its own option, like a -force flag.
-
-        To do detect if a manga uses the volume or chapter system, we can inspect the chapter list
-        soup to see how often these words appear: VOL, Vol, vol, VOLUME, Volume, volume. If this
-        is equal or at least very close to the chapter_num then it is most likely the volume system
-        is being used.
-        To-do:
-        - 
-        
         """
 
         adjusted_title = self.title
@@ -302,125 +246,8 @@ class Manga:
 
                     has_next_page = False
                     print('Beginning download of next chapter')
-            print('Finished!')
-        elif site == 'MangaHere':
-
-            if mh_args == 'c':
-
-                for chapter in chapter_list:
-                    
-                    os.makedirs('Downloads/' + adjusted_title + '/'
-                                + adjusted_title + ' ' + str(chapter))
-                    chapter_url = self.url + '/' + 'c' + '0' * (3
-                            - len(str(chapter))) + str(chapter) + '/'
-                    #chapter_url = self.url + '/' + 'c' + '0' * (2
-                            #- len(str(chapter))) + str(chapter) + '/'                    
-                    page_counter = 1
-                    has_next_page = True
-                    try:
-                        while has_next_page:
-                            page_url = chapter_url + str(page_counter) \
-                                + '.html'
-                            print (
-                                'Downloading',
-                                self.title,
-                                'Chapter',
-                                chapter,
-                                'Page',
-                                page_counter,
-                                )
-                            self.download_page(page_url, chapter,
-                                    page_counter)
-                            page_counter += 1
-                    except:
-
-                        # traceback.print_exc()
-
-                        has_next_page = False
-                        print('Beginning download of next chapter')
-                print('Finished!')
-                
-            elif mh_args == 'v':
-
-                for volume in chapter_list:
-
-                    os.makedirs('Downloads/' + adjusted_title + '/' + adjusted_title + ' ' + str(volume))
-                    volume_url = self.url + '/' + 'v' + '0' * (3 - len(str(volume))) + str(volume) + '/'
-
-                    has_next_chapter = True
-                    chapter_counter = 1
-                    tried_next_chapter = False
-
-                    try:
-                        while has_next_chapter:
-                            try:
-                                # make a folder for the new chapter
-                                os.makedirs('Downloads/' + adjusted_title + '/' + adjusted_title + ' ' + str(volume) + '/' + adjusted_title + ' ' + str(volume) + '-' + str(chapter_counter))
-                            except:
-                                print("failed to make folder")
-                            has_next_page = True
-                            page_counter = 1
-
-                            try:
-                                while has_next_page and not tried_next_chapter:
-
-                                    page_url = volume_url + 'c' + '0' * (3 - len(str(volume))) + str(chapter_counter) + '/' + str(page_counter) + '.html'
-                                    print ('Downloading', self.title, 'Volume', volume, 'Chapter', chapter_counter, 'Page', page_counter, "from", page_url)
-                                    self.download_page(page_url, chapter_counter, page_counter, volume)
-                                    page_counter += 1
-                                    
-                            except:
-                                
-                                if tried_next_chapter:
-                                    x = 1/0                                                                                                            
-                                
-                                has_next_page = False
-                                tried_next_chapter = True
-                                chapter_counter += 1
-                                print('Beginning download of next chapter')
-                                
-                    except:
-                        print('Beginning download of next volume')
-                        continue
-            
-            if mh_args=="fv":
-                # this supports full download from mangahere
-         
-                chapter_list = []
-                # grab urls from chapter list
-                for i in m.soup.select('[class~=detail-main-list] li a'):
-                    chapter_list.append(i['href']) 
-                    print("DEBUG: PRINT CHAPTER", i['href'])
-                    
-                # Since first chapter will be last in this list
-                chapter_list.reverse()                             
-                
-                # iterate through page num until done for each one
-                for chapter_link in chapter_list:
-                    
-                    
-                    
-                    # Decide folder for the chapter. Name based on url and create it.
-                    chap_num, vol_num = chapter_link[-4:-1], chapter_link[-9:-6]
-                    os.makedirs('Downloads/' + adjusted_title + '/' + \
-                                adjusted_title + ' ' + str(vol_num) + '/' + \
-                                adjusted_title + ' ' + str(vol_num) + '-' + str(chap_num))      
-                    
-                    # Now iterate through it and download every page in this chapter.
-                    page_counter = 1
-                    while True:
-                        page_url = self.url + "v" + vol_num + "/c" + chap_num + "/" + str(page_counter) + ".html"
-                        print ('Downloading', self.title, 'Volume', vol_num, 'Chapter', chap_num, 'Page', page_counter, "from", page_url)
-                        try:
-                            self.download_page(page_url, chap_num, page_counter, vol_num)
-                            page_counter += 1
-                        except:
-                            "Chapter complete."
-                            break
+            print('Finished!')                        
                         
-                        
-            
-           
                     
     def download_page(
         self,
@@ -447,24 +274,6 @@ class Manga:
             for chunk in res.iter_content(100000):
                 imageFile.write(chunk)
             imageFile.close()
-            
-        elif site == 'MangaHere':
-            
-            if mh_args == "fv":
-                chapter = int(chapter.lstrip("0"))
-                volume = int(volume.lstrip("0"))
-
-            adjusted_title = self.title
-            for punctuation in '!@#$%^&*+=~><\\/:;':
-                adjusted_title = adjusted_title.replace(punctuation, '')
-            img_url = self.get_img_url(page_url)
-            res = requests.get(img_url)
-            img_path = 'Downloads/' + adjusted_title + '/' + adjusted_title + ' ' + str(volume) + '/' + adjusted_title + ' ' + str(volume) + '-' + str(chapter)
-            img_title = adjusted_title + ' ' + str(volume) + '-' + str(chapter) + '-' + str(page_counter) + '.jpg'
-            imageFile = open(img_path + "/" + img_title, 'wb')
-            for chunk in res.iter_content(100000):
-                imageFile.write(chunk)
-            imageFile.close()
 
     def get_img_url(self, page_url):
         """
@@ -481,29 +290,5 @@ class Manga:
 
         if site == 'MangaReader':
             img_url = soup.find(id='img')['src']
-        elif site == 'MangaHere':
-
-            img_url = soup.find(id='[class~=reader-main-img]')['src']
 
         return img_url
-    
-
-#m = Manga("Battle Angel Alita", "http://www.mangahere.cc/manga/vovnich_hotel/")
-#m.download_chapters([1,2])
-url = "http://www.mangahere.cc/manga/vovnich_hotel/"
-res = requests.get("https://www.mangahere.cc/manga/hatarakanai_futari_yoshida_satoru/")
-res.raise_for_status()
-html_doc = res.text
-soup = BeautifulSoup(html_doc, 'html.parser')
-
-session = requests.get(url)
-
-print(session.cookies.get_dict())
-
-"""
-c = {'isAdult': '1'}
-c
-{'isAdult': '1'}
-r = requests.get(url, cookies=c)
-"title3" in r.text
-"""
